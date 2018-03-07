@@ -70,7 +70,7 @@ int main(int argc, const char * argv[]) {
     
     string strDataBuffer = "";
     
-    ifstream ifFileStream ("/Users/gustavocampos/Library/Developer/Xcode/DerivedData/json2text-hcpqndjwfftzougdhdywfeemzrgr/Build/Products/Debug/response_ident.json");
+    ifstream ifFileStream ("/desenv/samples/response_ident.json");
     
     //jsonParser lexParser (cin);
     jsonParser lexParser (ifFileStream);

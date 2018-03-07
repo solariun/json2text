@@ -101,18 +101,17 @@ enum jsonElements_t
  * Type used for returning the Lexical ITem
  */
 
-class jsonDataITem
+class jsonParserITemRet
 {
 public:
-    jsonDataITem(jsonElements_t  jsoneType, string& strAttribute, string& strValue) : jsoneType(jsoneType), strValue(strValue), strAttribute(strAttribute){};
+    jsonParserITemRet(jsonElements_t  jsoneType, string& strValue) : jsoneType(jsoneType), strValue(strValue){};
     
-    jsonDataITem(){};
+    jsonParserITemRet(){};
     
-    jsonDataITem* assign (jsonElements_t  jsoneType, string& strAttribute, string& strValue)
+    jsonParserITemRet* assign (jsonElements_t  jsoneType, string& strValue)
     {
         this->jsoneType = jsoneType;
         this->strValue = strValue;
-        this->strAttribute = strAttribute;
         
         return this;
     }
