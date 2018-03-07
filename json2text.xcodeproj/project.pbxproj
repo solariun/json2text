@@ -35,6 +35,7 @@
 		675C95F6204EB468005E82BE /* MetaException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = MetaException.hpp; path = /desenv/xworkspace/json2text/json2text/MetaException.hpp; sourceTree = "<absolute>"; };
 		675C95F7204EB468005E82BE /* Util.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Util.cpp; path = /desenv/xworkspace/json2text/json2text/Util.cpp; sourceTree = "<absolute>"; };
 		67A1817E204F769900939F3D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		67A1817F204F794900939F3D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +52,7 @@
 		675C95DE204EAFB2005E82BE = {
 			isa = PBXGroup;
 			children = (
+				67A1817F204F794900939F3D /* LICENSE */,
 				67A1817E204F769900939F3D /* README.md */,
 				675C95E9204EAFB2005E82BE /* json2text */,
 				675C95E8204EAFB2005E82BE /* Products */,
