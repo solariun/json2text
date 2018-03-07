@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		675C95EB204EAFB2005E82BE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 675C95EA204EAFB2005E82BE /* main.cpp */; };
+		675C95F3204EB3F5005E82BE /* JsonParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 675C95F1204EB3F5005E82BE /* JsonParser.cpp */; };
+		675C95F8204EB468005E82BE /* MetaException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 675C95F4204EB468005E82BE /* MetaException.cpp */; };
+		675C95F9204EB468005E82BE /* Util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 675C95F7204EB468005E82BE /* Util.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +28,13 @@
 /* Begin PBXFileReference section */
 		675C95E7204EAFB2005E82BE /* json2text */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = json2text; sourceTree = BUILT_PRODUCTS_DIR; };
 		675C95EA204EAFB2005E82BE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		675C95F1204EB3F5005E82BE /* JsonParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = JsonParser.cpp; sourceTree = "<group>"; };
+		675C95F2204EB3F5005E82BE /* JsonParser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = JsonParser.hpp; sourceTree = "<group>"; };
+		675C95F4204EB468005E82BE /* MetaException.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MetaException.cpp; path = /desenv/xworkspace/json2text/json2text/MetaException.cpp; sourceTree = "<absolute>"; };
+		675C95F5204EB468005E82BE /* Util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Util.hpp; path = /desenv/xworkspace/json2text/json2text/Util.hpp; sourceTree = "<absolute>"; };
+		675C95F6204EB468005E82BE /* MetaException.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = MetaException.hpp; path = /desenv/xworkspace/json2text/json2text/MetaException.hpp; sourceTree = "<absolute>"; };
+		675C95F7204EB468005E82BE /* Util.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Util.cpp; path = /desenv/xworkspace/json2text/json2text/Util.cpp; sourceTree = "<absolute>"; };
+		67A1817E204F769900939F3D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +51,7 @@
 		675C95DE204EAFB2005E82BE = {
 			isa = PBXGroup;
 			children = (
+				67A1817E204F769900939F3D /* README.md */,
 				675C95E9204EAFB2005E82BE /* json2text */,
 				675C95E8204EAFB2005E82BE /* Products */,
 			);
@@ -57,7 +68,13 @@
 		675C95E9204EAFB2005E82BE /* json2text */ = {
 			isa = PBXGroup;
 			children = (
+				675C95F4204EB468005E82BE /* MetaException.cpp */,
+				675C95F6204EB468005E82BE /* MetaException.hpp */,
+				675C95F7204EB468005E82BE /* Util.cpp */,
+				675C95F5204EB468005E82BE /* Util.hpp */,
 				675C95EA204EAFB2005E82BE /* main.cpp */,
+				675C95F1204EB3F5005E82BE /* JsonParser.cpp */,
+				675C95F2204EB3F5005E82BE /* JsonParser.hpp */,
 			);
 			path = json2text;
 			sourceTree = "<group>";
@@ -119,7 +136,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				675C95F3204EB3F5005E82BE /* JsonParser.cpp in Sources */,
+				675C95F8204EB468005E82BE /* MetaException.cpp in Sources */,
 				675C95EB204EAFB2005E82BE /* main.cpp in Sources */,
+				675C95F9204EB468005E82BE /* Util.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
