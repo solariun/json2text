@@ -1,5 +1,4 @@
-//
-//  main.cpp
+ //  main.cpp
 //  json2text
 //
 //  Created by GUSTAVO CAMPOS on 06/03/18.
@@ -75,7 +74,7 @@ int main(int argc, const char * argv[]) {
     //jsonParser lexParser (cin);
     jsonParser lexParser (ifFileStream);
     
-    jsonToTextitereactor iteractor;
+    jsonToTextContext iteractor;
     
     try
     {
@@ -86,7 +85,7 @@ int main(int argc, const char * argv[]) {
     }
     catch (MetaException* ex)
     {
-        cerr << "Exception " << ex->what() << " - " << ex->getExMessage();
+        cerr << "Exception " << ex->what() << " - " << ex->getExMessage() << endl;
     }
     catch (exception& ex)
     {

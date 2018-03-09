@@ -39,19 +39,8 @@
 #include <new>
 
 
-#define LX_OTIONS "!-/=!"
+#define LX_OTIONS "!-/=! "
 #define LX_DIVISION " \r\n\t"
-/*
- Exception Handler
- */
-
-jsonParserEx::jsonParserEx () : MetaException(0, "")
-{}
-
-
-jsonParserEx::jsonParserEx (uint32_t n32Code, string strMessage) : MetaException(n32Code, strMessage)
-{}
-
 
 /*
  Lexical Parser Functions
@@ -62,7 +51,7 @@ jsonParser::jsonParser ()
 
 
 jsonParser::jsonParser (istream& isIn) : isIn (isIn)
-{}
+{cout << "init class: " << typeid(this).name() << endl; }
 
 
 jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet)
@@ -193,68 +182,120 @@ jsonParserITemRet* jsonParser::getNewjsonParserITemRet(jsonElements_t  jsoneType
 }
 
 
-jsonToTextitereactor* jsonParser::getNextxpathLikeItem (jsonToTextitereactor& itereactor)
+void jsonParser::pushPath (jsonToTextContext& context)
+{
+    context.strPath +=  "/" + context.strVariableName;
+    
+    context.nCurrentLevel++;
+    
+    cout << endl << "New Path: [" << context.strPath << "] VariableName.size: [" << context.strVariableName.size() << "]" << endl<<endl;
+
+}
+
+void jsonParser::popPath  (jsonToTextContext& context)
+{
+    size_t nLastSlash = context.strPath.find_last_of("/");
+    
+    if (nLastSlash == string::npos)
+        return;
+    
+    cout << endl;
+    cout << "Actual Path: [" << context.strPath << "(" << context.strPath.size() << ", " << nLastSlash << "," << context.strPath [nLastSlash] << ")" << endl;
+    
+    context.strPath.resize(nLastSlash);
+    context.nCurrentLevel--;
+    
+    cout << "Old Path: [" << context.strPath << "]" << endl << endl;
+}
+
+jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
 {
     //jsonParserEx::verify(strReturn != NULL, 10, "Error, the String variable is invalid. (NULL)");
     
     jsonParserITemRet jsonLexRet;
-
     
     
     while (getNextLexicalItem(jsonLexRet) != NULL)
     {
         //cout << "received : " << jsonLexRet.jsoneType << " : " << jsonLexRet.strValue << endl;
-        
-        if (itereactor.nStatus != none_tag && jsonLexRet.jsoneType == open_struct_tag)
+        if (jsonLexRet.jsoneType == close_array_tag)
         {
-            if (itereactor.nStatus == value_tag)
+            cout << "";
+        }
+        
+        if (/*context.nStatus != none_tag && */jsonLexRet.jsoneType == open_struct_tag)
+        {
+            if (context.nStatus == value_tag)
             {
-                itereactor.strPath +=  "/" + itereactor.strVariableName;
+                pushPath (context);
                 
-                //cout << "New Path: [" << itereactor.strPath << "]" << endl;
-                
-                itereactor.nLevels++;
-                
-                itereactor.nStatus = none_tag;
+                context.nStatus = none_tag;
             }
         }
-        else if (jsonLexRet.jsoneType == close_struct_tag)
+        else if (jsonLexRet.jsoneType == close_struct_tag && context.nCurrentLevel >= context.nMinimalLevel)
         {
-            size_t nLastSlash = itereactor.strPath.find_last_of("/");
-            
-            //cout << endl;
-            //cout << "Actual Path: [" << itereactor.strPath << "(" << itereactor.strPath.size() << ", " << nLastSlash << "," << itereactor.strPath [nLastSlash] << ")" << endl;
-            
-            itereactor.strPath.resize(nLastSlash);
-            
-            //cout << "Old Path: [" << itereactor.strPath << "]" << endl;
-            
-            itereactor.nLevels--;
+            popPath (context);
         }
-        else if (itereactor.nStatus == value_tag && jsonLexRet.jsoneType == open_array_tag)
+        else if (context.nStatus == value_tag && jsonLexRet.jsoneType == open_array_tag)
         {
-            itereactor.nStatus = none_tag;
+            context.nStatus = none_tag;
+            context.queueArrayLimits.push (context.nCurrentLevel);
             
+            pushPath (context);
+            
+            context.nMinimalLevel = context.nCurrentLevel;
         }
-        else if (itereactor.nStatus == value_tag && jsonLexRet.jsoneType == close_array_tag)
+        else if (context.nStatus == attribute_tag && (jsonLexRet.jsoneType == set_tag))
         {
-            itereactor.nStatus = none_tag;
+            context.nStatus = value_tag;
         }
-        else if (itereactor.nStatus == none_tag && jsonLexRet.jsoneType == string_tag)
+        else if ((context.nStatus == none_tag || context.nStatus == attribute_tag) && jsonLexRet.jsoneType == close_array_tag)
         {
-            itereactor.strVariableName = jsonLexRet.strValue;
+            VERIFY(context.queueArrayLimits.empty() == false, 10, "Error, Array controler queue empty.");
             
-            jsonParserEx::verify(getNextLexicalItem(jsonLexRet) != NULL && jsonLexRet.jsoneType == set_tag, toText_Set_Expected, "Error, no set char fond.");
+            context.nMinimalLevel = context.queueArrayLimits.front();
+            context.queueArrayLimits.pop(); //cleaning the last item pushed
             
-            itereactor.nStatus = value_tag;
+            popPath(context);
+            
+            if (context.nStatus == attribute_tag)
+            {
+                context.strVariableName.size();
+                
+                context.strDataValue =  context.strVariableName;
+                context.strDataPath  =   context.strPath;
+                context.strVariableName = "";
+                
+                context.nStatus = none_tag;
+                return &context;
+            }
+            
+            context.nStatus = none_tag;
         }
-        else if (itereactor.nStatus == value_tag && jsonLexRet.jsoneType == string_tag)
+        else if (context.nStatus == none_tag && jsonLexRet.jsoneType == string_tag)
         {
-            itereactor.strDataValue =  jsonLexRet.strValue;
-            itereactor.strDataPath  =   itereactor.strPath + "/" + itereactor.strVariableName;
+            context.strVariableName = jsonLexRet.strValue;
             
-            itereactor.nStatus = none_tag;
-            return &itereactor;
+            //VERIFY (getNextLexicalItem(jsonLexRet) != NULL && jsonLexRet.jsoneType == set_tag, toText_Set_Expected, "Error, no set char fond.");
+            
+            context.nStatus = attribute_tag;
+        }
+        else if (context.nStatus == attribute_tag)
+        {
+            context.strDataValue =  context.strVariableName;
+            context.strDataPath  =   context.strPath;
+            context.strVariableName = "";
+            
+            context.nStatus = none_tag;
+            return &context;
+        }
+        else if (context.nStatus == value_tag && jsonLexRet.jsoneType == string_tag)
+        {
+            context.strDataValue =  jsonLexRet.strValue;
+            context.strDataPath  =   context.strPath + "/" + context.strVariableName;
+            
+            context.nStatus = none_tag;
+            return &context;
         }
     };
     

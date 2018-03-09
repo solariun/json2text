@@ -33,13 +33,25 @@
 #include "MetaException.hpp"
 #include <sstream>
 
+inline std::string className(const std::string& prettyFunction)
+{
+    size_t colons = prettyFunction.find("::");
+    if (colons == std::string::npos)
+        return "__BODY__";
+    size_t begin = prettyFunction.substr(0,colons).rfind(" ") + 1;
+    size_t end = colons - begin;
+    
+    return prettyFunction.substr(begin,end);
+}
 
-MetaException::MetaException(const uint32_t nExID,  const string& strValue) _NOEXCEPT: strExText(strValue), nExID(nExID)
+#define __CLASS_NAME__ className(__PRETTY_FUNCTION__)
+
+MetaException::MetaException(const string& strType, const uint32_t nExID,  const string& strValue) _NOEXCEPT: strExText(strValue), nExID(nExID), strType(strType)
 {
     return;
 }
 
-MetaException::MetaException(const uint32_t nExID,  const char* pszValue)  _NOEXCEPT: strExText(pszValue), nExID(nExID)
+MetaException::MetaException(const string& strType, const uint32_t nExID,  const char* pszValue)  _NOEXCEPT: strExText(pszValue), nExID(nExID), strType(strType)
 {
     return;
 }
@@ -67,19 +79,23 @@ MetaException::~MetaException() _NOEXCEPT
 
 const char* MetaException::what() const _NOEXCEPT
 {
-    return "Default Exception mode.";
+
+    return strType.c_str();
 }
 
 
-void MetaException::verify(bool bCriteria, const u_int32_t nExID, const char* pszStringValue)
+void MetaException::verify(bool bCriteria, const char* pszType, const char* pszFile, const size_t nFileLine, const char* pszFuncion, const char* pszCode, const u_int32_t nExID, const char* pszStringValue)
 {
     if (!bCriteria)
     {
-        std::stringstream strValue;
+        stringstream strsValue;
+        string       strClassName = className(pszFuncion);
         
-        strValue << "Exception at " <<  __FILE__ << "(" << __LINE__ << "):" << __PRETTY_FUNCTION__ << ":" << nExID << ":" << pszStringValue;
+        if (strClassName.size() == 0) strClassName = "__BODY__";
         
-        throw new MetaException (nExID, strValue.str());
+        strsValue << " at " << pszFile << "(" << nFileLine << "), Func: [" << pszFuncion << "], Code: [" << pszCode << "], ID:(" << nExID << "):" << pszStringValue;
+        
+        throw new MetaException (strClassName, nExID, strsValue.str());
     }
 }
 

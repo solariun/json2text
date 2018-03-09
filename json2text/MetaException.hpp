@@ -38,19 +38,23 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <typeinfo>
 
 using namespace std;
 
+
+#define VERIFY(cond,id,text) MetaException::verify (cond, "typeid (this).name()", __FILE__, __LINE__, __PRETTY_FUNCTION__, #cond, id, text)
 
 class MetaException
 {
 private:
     uint32_t nExID;
     string   strExText;
+    string   strType;
     
 public:
-    MetaException(const uint32_t nExID,  const string&) _NOEXCEPT;
-    MetaException(const uint32_t nExID,  const char*) _NOEXCEPT;
+    MetaException(const string& strType, const uint32_t nExID,  const string&) _NOEXCEPT;
+    MetaException(const string& strType, const uint32_t nExID,  const char*) _NOEXCEPT;
     
     MetaException(const MetaException&) _NOEXCEPT;
     MetaException& operator=(const MetaException&) _NOEXCEPT;
@@ -59,7 +63,7 @@ public:
     
     virtual const char* what() const _NOEXCEPT;
     
-    static void verify(bool nCriteria, const u_int32_t nExID, const char* pszStringValue);
+    static void verify(bool bCriteria, const char* pszType, const char* pszFile, const size_t nFileLine, const char* pszFuncion, const char* pszCode, const u_int32_t nExID, const char* pszStringValue);
     
     const uint32_t getExceptionID ();
     const char* getExMessage ();

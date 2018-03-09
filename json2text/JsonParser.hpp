@@ -45,35 +45,14 @@
 using namespace std;
 
 /*
- Excpetion habler
- */
-class jsonParserEx : public MetaException
-{
-private:
-    uint32_t n32Code;
-    string   strMessage;
-    
-    jsonParserEx();
-    
-public:
-    
-    jsonParserEx (uint32_t n32Code, string strMessage);
-    
-    virtual const char* what() const throw()
-    {
-        return "jsonParser::jsonParserEx";
-    }
-};
-
-
-/*
  * ERROR CODE
  */
 
 enum jsonErrorCodes
 {
     toText_Variable_Expceted,
-    toText_Set_Expected
+    toText_Set_Expected,
+    toText_Array_Queue_Enpty
 };
 
 /*
@@ -85,7 +64,7 @@ enum jsonElements_t
     none_tag,
     open_struct_tag,
     close_struct_tag,
-    attribure_tag,
+    attribute_tag,
     set_tag,
     value_tag,
     string_quote_tag,
@@ -104,7 +83,7 @@ enum jsonElements_t
 class jsonParserITemRet
 {
 public:
-    jsonParserITemRet(jsonElements_t  jsoneType, string& strValue) : jsoneType(jsoneType), strValue(strValue){};
+    jsonParserITemRet(jsonElements_t  jsoneType, string& strValue) : jsoneType(jsoneType), strValue(strValue){cout << "init class: " << typeid(this).name() << endl; };
     
     jsonParserITemRet(){};
     
@@ -125,16 +104,16 @@ public:
  * Type used for json for text interactions
  */
 
-class jsonToTextitereactor
+class jsonToTextContext
 {
 public:
     string      strPath = "";
     string      strVariableName = "";
-    size_t      nLevels=0;
+    size_t      nCurrentLevel=0;
     size_t      nMinimalLevel=0;
     bool        bArrayOn;
     
-    queue<size_t> nArrayQueue;
+    queue<size_t>  queueArrayLimits;
     
     jsonElements_t nStatus = none_tag;
     
@@ -161,11 +140,13 @@ private:
 
     jsonParserITemRet* getNextLexicalItem (jsonParserITemRet& strData);
 
+    void pushPath (jsonToTextContext& context);
+    void popPath  (jsonToTextContext& context);
 public:
     
     jsonParser (istream& isIn);
     
-    jsonToTextitereactor* getNextxpathLikeItem (jsonToTextitereactor& itereactor);
+    jsonToTextContext* getNextxpathLikeItem (jsonToTextContext& itereactor);
     
 };
 

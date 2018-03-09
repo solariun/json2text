@@ -40,7 +40,6 @@
 #include <fstream>
 #include <string>
 
-#define VERIFY(x,y, z...) if (!(x)) { ExceptionHandle (__FILE__, __PRETTY_FUNCTION__, __LINE__, #x, y [0] == '\0' ? strerror (errno) : y, ##z); IfException (); throw this;  } else { errno = 0; }
 
 
 bool isBetween  (char chChar, const char* pszCharList, int32_t nMaxCharList);
