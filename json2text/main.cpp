@@ -63,6 +63,7 @@ int main(int argc, const char * argv[]) {
     if (isatty (fileno(stdin)))
     {
         cout << "This applicacion works with pipe only." << endl;
+        exit (1);
     }
     
     cin.rdbuf()->pubsetbuf(chCinbuffer, sizeof (chCinbuffer));
@@ -71,8 +72,8 @@ int main(int argc, const char * argv[]) {
     
     ifstream ifFileStream ("/desenv/samples/response_ident.json");
     
-    //jsonParser lexParser (cin);
-    jsonParser lexParser (ifFileStream);
+    jsonParser lexParser (cin);
+    //jsonParser lexParser (ifFileStream);
     
     jsonToTextContext iteractor;
     
