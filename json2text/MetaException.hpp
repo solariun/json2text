@@ -53,15 +53,15 @@ private:
     string   strType;
     
 public:
-    MetaException(const string& strType, const uint32_t nExID,  const string&) _NOEXCEPT;
-    MetaException(const string& strType, const uint32_t nExID,  const char*) _NOEXCEPT;
+    MetaException(const string& strType, const uint32_t nExID,  const string&) noexcept;
+    MetaException(const string& strType, const uint32_t nExID,  const char*) noexcept;
     
-    MetaException(const MetaException&) _NOEXCEPT;
-    MetaException& operator=(const MetaException&) _NOEXCEPT;
+    MetaException(const MetaException&) noexcept;
+    MetaException& operator=(const MetaException&) noexcept;
     
-    ~MetaException() _NOEXCEPT;
+    ~MetaException() noexcept;
     
-    virtual const char* what() const _NOEXCEPT;
+    virtual const char* what() const noexcept;
     
     static void verify(bool bCriteria, const char* pszType, const char* pszFile, const size_t nFileLine, const char* pszFuncion, const char* pszCode, const u_int32_t nExID, const char* pszStringValue);
     

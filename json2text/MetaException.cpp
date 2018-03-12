@@ -46,24 +46,24 @@ inline std::string className(const std::string& prettyFunction)
 
 #define __CLASS_NAME__ className(__PRETTY_FUNCTION__)
 
-MetaException::MetaException(const string& strType, const uint32_t nExID,  const string& strValue) _NOEXCEPT: strExText(strValue), nExID(nExID), strType(strType)
+MetaException::MetaException(const string& strType, const uint32_t nExID,  const string& strValue) noexcept: strExText(strValue), nExID(nExID), strType(strType)
 {
     return;
 }
 
-MetaException::MetaException(const string& strType, const uint32_t nExID,  const char* pszValue)  _NOEXCEPT: strExText(pszValue), nExID(nExID), strType(strType)
+MetaException::MetaException(const string& strType, const uint32_t nExID,  const char* pszValue)  noexcept: strExText(pszValue), nExID(nExID), strType(strType)
 {
     return;
 }
 
 
-MetaException::MetaException(const MetaException& exMetaException) _NOEXCEPT
+MetaException::MetaException(const MetaException& exMetaException) noexcept
 {
     (*this) =exMetaException;
     return;
 }
 
-MetaException& MetaException::operator=(const MetaException& exMetaException) _NOEXCEPT
+MetaException& MetaException::operator=(const MetaException& exMetaException) noexcept
 {
     this->nExID = exMetaException.nExID;
     this->strExText.assign(exMetaException.strExText);
@@ -72,12 +72,12 @@ MetaException& MetaException::operator=(const MetaException& exMetaException) _N
 }
 
 
-MetaException::~MetaException() _NOEXCEPT
+MetaException::~MetaException() noexcept
 {
     return;
 }
 
-const char* MetaException::what() const _NOEXCEPT
+const char* MetaException::what() const noexcept
 {
 
     return strType.c_str();
