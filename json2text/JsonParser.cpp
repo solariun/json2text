@@ -37,6 +37,7 @@
 
 #include <iostream>
 #include <new>
+#include <sstream>
 
 
 #define LX_OTIONS "!-/=! "
@@ -152,12 +153,15 @@ jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet
             
             //cout << "adding [" << chChar << "] - type: " << nType << endl;
             
-            if (chChar == '\n')
+            /*
+             if (chChar == '\n')
                 strData += "\n";
             else if (chChar == '\r')
                 strData += "\r";
             else
-                strData += chChar;
+             */
+             
+            if (chChar >= ' ') strData += chChar;
             
         }
     }
@@ -188,7 +192,7 @@ void jsonParser::pushPath (jsonToTextContext& context)
     
     context.nCurrentLevel++;
     
-    cout << endl << "New Path: [" << context.strPath << "] VariableName.size: [" << context.strVariableName.size() << "]" << endl<<endl;
+    //cout << endl << "New Path: [" << context.strPath << "] VariableName.size: [" << context.strVariableName.size() << "]" << endl<<endl;
 
 }
 
@@ -199,14 +203,32 @@ void jsonParser::popPath  (jsonToTextContext& context)
     if (nLastSlash == string::npos)
         return;
     
-    cout << endl;
-    cout << "Actual Path: [" << context.strPath << "(" << context.strPath.size() << ", " << nLastSlash << "," << context.strPath [nLastSlash] << ")" << endl;
+    //cout << endl;
+    //cout << "Actual Path: [" << context.strPath << "(" << context.strPath.size() << ", " << nLastSlash << "," << context.strPath [nLastSlash] << ")" << endl;
     
     context.strPath.resize(nLastSlash);
     context.nCurrentLevel--;
     
-    cout << "Old Path: [" << context.strPath << "]" << endl << endl;
+    //cout << "Old Path: [" << context.strPath << "]" << endl << endl;
 }
+
+
+void jsonParser::addArrayToDataPath (jsonToTextContext& context)
+{
+    if (context.nMinimalLevel > 0)
+    {
+        stringstream strsValue;
+
+        strsValue << "[" << context.nArrayCounter << "." << context.nArrayItemCounter << "]";
+        
+        context.strDataPath = context.strDataPath + strsValue.str();
+        
+        //cout << "Added Array data: " << context.strDataPath << endl;
+    }
+
+    //context.strDataPath += "." + std::to_string(context.nArrayItemCounter) + "." + std::to_string(context.nArrayCounter);
+}
+
 
 jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
 {
@@ -218,7 +240,8 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
     while (getNextLexicalItem(jsonLexRet) != NULL)
     {
         //cout << "received : " << jsonLexRet.jsoneType << " : " << jsonLexRet.strValue << endl;
-        if (jsonLexRet.jsoneType == close_array_tag)
+    
+        if (context.nArrayCounter == 3790 && context.nArrayItemCounter == 1)
         {
             cout << "";
         }
@@ -230,20 +253,31 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
                 pushPath (context);
                 
                 context.nStatus = none_tag;
+                
             }
+            
+            if (context.nCurrentLevel > 0) context.nArrayItemCounter++;
         }
-        else if (jsonLexRet.jsoneType == close_struct_tag && context.nCurrentLevel >= context.nMinimalLevel)
+        else if (context.nCurrentLevel >= context.nMinimalLevel && jsonLexRet.jsoneType == close_struct_tag )
         {
             popPath (context);
         }
-        else if (context.nStatus == value_tag && jsonLexRet.jsoneType == open_array_tag)
+        else if ((context.nStatus == value_tag || context.nStatus == none_tag) && jsonLexRet.jsoneType == open_array_tag)
         {
             context.nStatus = none_tag;
+            
             context.queueArrayLimits.push (context.nCurrentLevel);
+            context.queueArrayCounters.push (context.nArrayItemCounter);
+            
+            context.nArrayItemCounter = 1;
             
             pushPath (context);
             
             context.nMinimalLevel = context.nCurrentLevel;
+            
+            context.bArrayOn = true;
+            
+            context.nArrayCounter++;
         }
         else if (context.nStatus == attribute_tag && (jsonLexRet.jsoneType == set_tag))
         {
@@ -251,12 +285,12 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
         }
         else if ((context.nStatus == none_tag || context.nStatus == attribute_tag) && jsonLexRet.jsoneType == close_array_tag)
         {
+            bool brMustReturn = false;
+            
             VERIFY(context.queueArrayLimits.empty() == false, 10, "Error, Array controler queue empty.");
             
             context.nMinimalLevel = context.queueArrayLimits.front();
             context.queueArrayLimits.pop(); //cleaning the last item pushed
-            
-            popPath(context);
             
             if (context.nStatus == attribute_tag)
             {
@@ -266,11 +300,24 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
                 context.strDataPath  =   context.strPath;
                 context.strVariableName = "";
                 
-                context.nStatus = none_tag;
-                return &context;
+                addArrayToDataPath (context);
+                
+                brMustReturn = true;
             }
             
+            context.nArrayItemCounter = context.queueArrayCounters.front();
+            context.queueArrayCounters.pop();
+            
+            popPath(context);
+            
             context.nStatus = none_tag;
+            
+            context.bArrayOn = false;
+            
+            if (brMustReturn == true)
+            {
+                return &context;
+            }
         }
         else if (context.nStatus == none_tag && jsonLexRet.jsoneType == string_tag)
         {
@@ -284,6 +331,10 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
         {
             context.strDataValue =  context.strVariableName;
             context.strDataPath  =   context.strPath;
+            
+            addArrayToDataPath (context);
+            if (context.nArrayItemCounter> 0) context.nArrayItemCounter++;
+            
             context.strVariableName = "";
             
             context.nStatus = none_tag;
@@ -293,7 +344,8 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
         {
             context.strDataValue =  jsonLexRet.strValue;
             context.strDataPath  =   context.strPath + "/" + context.strVariableName;
-            
+            addArrayToDataPath (context);
+
             context.nStatus = none_tag;
             return &context;
         }

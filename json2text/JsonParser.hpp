@@ -111,9 +111,13 @@ public:
     string      strVariableName = "";
     size_t      nCurrentLevel=0;
     size_t      nMinimalLevel=0;
+    size_t      nArrayItemCounter = 0;
+    size_t      nArrayCounter=0;
+    
     bool        bArrayOn;
     
     queue<size_t>  queueArrayLimits;
+    queue<size_t>  queueArrayCounters;
     
     jsonElements_t nStatus = none_tag;
     
@@ -131,6 +135,7 @@ class jsonParser
 protected:
     istream& isIn = cin;
     jsonElements_t nType = none_tag;
+    void addArrayToDataPath (jsonToTextContext& context);
 
     
 private:
