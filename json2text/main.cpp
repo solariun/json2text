@@ -33,6 +33,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <errno.h>
 
 #include "JsonParser.hpp"
 
@@ -60,20 +61,44 @@ int main(int argc, const char * argv[]) {
      }
      */
     
+    istream* isInput;
+    
+    ifstream* ifsFile;
+    
     if (isatty (fileno(stdin)))
     {
         cout << "This applicacion works with pipe only." << endl;
-        exit (1);
+        
+        string strDataBuffer = "";
+        
+        if (argc != 2)
+        {
+            cout << "json to Text - " << to_string(argc) << endl;
+            cout << "By Gustavo Campos (2018)" << endl << endl;
+            cout << "Use by piping data or ./json2txt <file>" << endl << endl;
+            
+            exit (0);
+        }
+        
+        ifsFile = new ifstream (argv[1]);
+        //int errn = errno;
+        
+        if ((ifsFile->rdstate() & std::ifstream::failbit) != 0)
+        {
+            cerr << "Error: " << strerror(errno);
+        }
+        
+        isInput = ifsFile;
+        
+    }
+    else
+    {
+        cin.rdbuf()->pubsetbuf(chCinbuffer, sizeof (chCinbuffer));
+        
+        isInput = &cin;
     }
     
-    cin.rdbuf()->pubsetbuf(chCinbuffer, sizeof (chCinbuffer));
-    
-    string strDataBuffer = "";
-    
-    ifstream ifFileStream ("/desenv/samples/response_ident.json");
-    
-    jsonParser lexParser (cin);
-    //jsonParser lexParser (ifFileStream);
+    jsonParser lexParser (*isInput);
     
     jsonToTextContext iteractor;
     

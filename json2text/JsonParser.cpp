@@ -192,8 +192,9 @@ void jsonParser::pushPath (jsonToTextContext& context)
     
     context.nCurrentLevel++;
     
-    //cout << endl << "New Path: [" << context.strPath << "] VariableName.size: [" << context.strVariableName.size() << "]" << endl<<endl;
+    cout << endl << "New Path: [" << context.strPath << "] VariableName.size: [" << context.strVariableName.size() << "]" << endl<<endl;
 
+    context.strVariableName = "";
 }
 
 void jsonParser::popPath  (jsonToTextContext& context)
@@ -203,13 +204,13 @@ void jsonParser::popPath  (jsonToTextContext& context)
     if (nLastSlash == string::npos)
         return;
     
-    //cout << endl;
-    //cout << "Actual Path: [" << context.strPath << "(" << context.strPath.size() << ", " << nLastSlash << "," << context.strPath [nLastSlash] << ")" << endl;
+    cout << endl;
+    cout << "Actual Path: [" << context.strPath << "(" << context.strPath.size() << ", " << nLastSlash << "," << context.strPath [nLastSlash] << ")" << endl;
     
     context.strPath.resize(nLastSlash);
-    context.nCurrentLevel--;
+    if (context.nCurrentLevel >= context.nMinimalLevel) context.nCurrentLevel--;
     
-    //cout << "Old Path: [" << context.strPath << "]" << endl << endl;
+    cout << "Old Path: [" << context.strPath << "]" << endl << endl;
 }
 
 
@@ -230,44 +231,44 @@ void jsonParser::addArrayToDataPath (jsonToTextContext& context)
 }
 
 
+
+
+
 jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
 {
     //jsonParserEx::verify(strReturn != NULL, 10, "Error, the String variable is invalid. (NULL)");
     
     jsonParserITemRet jsonLexRet;
-    
-    
+        
     while (getNextLexicalItem(jsonLexRet) != NULL)
     {
-        //cout << "received : " << jsonLexRet.jsoneType << " : " << jsonLexRet.strValue << endl;
+        cout << "received : " << jsonLexRet.jsoneType << " : " << jsonLexRet.strValue << "; -->      nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
     
-        if (context.nArrayCounter == 3790 && context.nArrayItemCounter == 1)
-        {
-            cout << "";
-        }
         
-        if (/*context.nStatus != none_tag && */jsonLexRet.jsoneType == open_struct_tag)
+        if (jsonLexRet.jsoneType == open_struct_tag)
         {
-            if (context.nStatus == value_tag)
-            {
-                pushPath (context);
-                
-                context.nStatus = none_tag;
-                
-            }
+            if (context.nStatus != init_tag) pushPath (context);
             
-            if (context.nCurrentLevel > 0) context.nArrayItemCounter++;
+            context.nStatus = none_tag;
         }
         else if (context.nCurrentLevel >= context.nMinimalLevel && jsonLexRet.jsoneType == close_struct_tag )
         {
+            cout << "Closing struct: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
+            
             popPath (context);
+            
+            if (context.nCurrentLevel > 0) context.nArrayItemCounter++;
+            
+            context.strVariableName = "";
         }
         else if ((context.nStatus == value_tag || context.nStatus == none_tag) && jsonLexRet.jsoneType == open_array_tag)
         {
             context.nStatus = none_tag;
             
-            context.queueArrayLimits.push (context.nCurrentLevel);
-            context.queueArrayCounters.push (context.nArrayItemCounter);
+            //cout << "Open Array: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
+
+            context.lifoArrayLimits.push (context.nCurrentLevel);
+            context.lifoArrayCounters.push (context.nArrayItemCounter);
             
             context.nArrayItemCounter = 1;
             
@@ -287,10 +288,14 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
         {
             bool brMustReturn = false;
             
-            VERIFY(context.queueArrayLimits.empty() == false, 10, "Error, Array controler queue empty.");
+            VERIFY(context.lifoArrayLimits.empty() == false, 10, "Error, Array controler lifo empty.");
             
-            context.nMinimalLevel = context.queueArrayLimits.front();
-            context.queueArrayLimits.pop(); //cleaning the last item pushed
+            cout << "Open Array: Peering:  nMinimalLevel: " << context.lifoArrayLimits.top() << "; nArrayItemCounter: " << context.lifoArrayCounters.top() << endl;
+            
+            context.nMinimalLevel = context.lifoArrayLimits.top();
+            context.lifoArrayLimits.pop(); //cleaning the last item pushed
+            
+            cout << "Open Array: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
             
             if (context.nStatus == attribute_tag)
             {
@@ -305,14 +310,17 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
                 brMustReturn = true;
             }
             
-            context.nArrayItemCounter = context.queueArrayCounters.front();
-            context.queueArrayCounters.pop();
+            context.nArrayItemCounter = context.lifoArrayCounters.top();
+            context.lifoArrayCounters.pop();
             
             popPath(context);
+            
             
             context.nStatus = none_tag;
             
             context.bArrayOn = false;
+            
+            context.strVariableName = "";
             
             if (brMustReturn == true)
             {
@@ -333,11 +341,14 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
             context.strDataPath  =   context.strPath;
             
             addArrayToDataPath (context);
+            
             if (context.nArrayItemCounter> 0) context.nArrayItemCounter++;
             
             context.strVariableName = "";
             
             context.nStatus = none_tag;
+            context.strVariableName = "";
+            
             return &context;
         }
         else if (context.nStatus == value_tag && jsonLexRet.jsoneType == string_tag)
@@ -347,11 +358,27 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
             addArrayToDataPath (context);
 
             context.nStatus = none_tag;
+            
+            context.strVariableName="";
             return &context;
         }
     };
     
     return NULL;
+}
+
+
+
+
+void jsonParser::dumpjsonAsText (ostream osOutput)
+{
+    
+    jsonParserITemRet jsonLexRet;
+    
+    
+    while (getNextLexicalItem(jsonLexRet) != NULL)
+    {
+    }
 }
 
 

@@ -39,7 +39,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <queue>
+#include <stack>
 #include "MetaException.hpp"
 
 using namespace std;
@@ -52,7 +52,7 @@ enum jsonErrorCodes
 {
     toText_Variable_Expceted,
     toText_Set_Expected,
-    toText_Array_Queue_Enpty
+    toText_Array_lifo_Enpty
 };
 
 /*
@@ -61,6 +61,7 @@ enum jsonErrorCodes
 
 enum jsonElements_t
 {
+    init_tag,
     none_tag,
     open_struct_tag,
     close_struct_tag,
@@ -116,10 +117,10 @@ public:
     
     bool        bArrayOn;
     
-    queue<size_t>  queueArrayLimits;
-    queue<size_t>  queueArrayCounters;
+    stack<size_t>  lifoArrayLimits;
+    stack<size_t>  lifoArrayCounters;
     
-    jsonElements_t nStatus = none_tag;
+    jsonElements_t nStatus = init_tag;
     
     string strDataPath = "";
     string strDataValue= "";
@@ -136,7 +137,6 @@ protected:
     istream& isIn = cin;
     jsonElements_t nType = none_tag;
     void addArrayToDataPath (jsonToTextContext& context);
-
     
 private:
     jsonParser ();
@@ -153,6 +153,7 @@ public:
     
     jsonToTextContext* getNextxpathLikeItem (jsonToTextContext& itereactor);
     
+    void dumpjsonAsText (ostream osOutput);
 };
 
 
