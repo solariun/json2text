@@ -405,14 +405,16 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
     jsonParserITemRet jsonLexRet;
     jsonElements_t nWorking = none_tag;
     
+    uint32_t  nLevels = 0;
+    
     string strValue = "";
     
     
-    if (nStatus == struct_tag || nStatus == array_tag)
+    if (nStatus == named_struct_tag || nStatus == struct_tag || nStatus == array_tag)
     {
         nWorking = nStatus;
         
-    
+        nStatus = none_tag;
     }
     
     while (getNextLexicalItem(jsonLexRet) != NULL)
@@ -426,9 +428,17 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
         {
             if (nStatus != init_tag)
             {
-                if (nStatus == set_tag && strValue.size()>0) pushPath(*strPath, strValue);
+                jsonElements_t tempStatus = struct_tag;
                 
-                dumpjsonAsText (osOutput, struct_tag, strPath);
+                if (nStatus == attributive_tag && strValue.size()>0)
+                {
+                    pushPath(*strPath, strValue);
+                    nLevels++;
+                    
+                    tempStatus = named_struct_tag;
+                }
+
+                dumpjsonAsText (osOutput, tempStatus, strPath);
             }
             
             nStatus = none_tag;
@@ -437,12 +447,15 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
         }
         else if (jsonLexRet.jsoneType == open_array_tag)
         {
-            VERIFY ( nStatus == attributive_tag &&strValue.size() > 0, 11,
+            VERIFY ( nStatus == attributive_tag && strValue.size() > 0, 11,
                     "Errro, the Array MUST be after an attributive session.");
             
             pushPath(*strPath, strValue);
+            nLevels++;
             
             dumpjsonAsText (osOutput, array_tag, strPath);
+            
+            continue;
         }
         else if (nStatus == none_tag && jsonLexRet.jsoneType == string_tag)
         {
@@ -466,25 +479,46 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
         }
         
         
-        if (nWorking == struct_tag)
+        if (nWorking == struct_tag || nWorking == named_struct_tag)
         {
+            
             if (nStatus == value_tag)
             {
-                prt_tag(*strPath << "none", jsonLexRet.strValue);
+                prt_tag(*strPath << "none", strValue);
             }
-            else if (jsonLexRet.jsoneType == close_array_tag)
+            else if (nStatus == attributive_tag)
+            {
+                VERIFY (jsonLexRet.jsoneType == string_tag, 13, "Error, no associated DATA.");
+                
+                prt_tag(*strPath << "/" << strValue, jsonLexRet.strValue);
+            }
+            else if (jsonLexRet.jsoneType == close_struct_tag)
             {
                 VERIFY (nStatus == none_tag, 12, "Error, closing struct must be CLEAR.");
                 
+                if (nWorking == named_struct_tag)
+                {
+                    popPath(*strPath);
+                }
+                
                 return;
             }
+            
             nStatus = none_tag;
+            
         }
         else if (nWorking == array_tag)
         {
+            
             if (nStatus == value_tag)
             {
                 prt_tag(*strPath, jsonLexRet.strValue);
+            }
+            else if (nStatus == attributive_tag)
+            {
+                VERIFY (jsonLexRet.jsoneType == string_tag, 13, "Error, no associated DATA.");
+                
+                prt_tag(*strPath << "/" << strValue, jsonLexRet.strValue);
             }
             else if (jsonLexRet.jsoneType == close_array_tag)
             {

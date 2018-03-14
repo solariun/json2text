@@ -64,6 +64,7 @@ enum jsonElements_t
     init_tag,
     none_tag,
     struct_tag,
+    named_struct_tag,
     open_struct_tag,
     close_struct_tag,
     attributive_tag,
