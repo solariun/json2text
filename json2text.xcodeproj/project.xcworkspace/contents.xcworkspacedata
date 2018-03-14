@@ -2,18 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:/desenv/xworkspace/json2text/json2text/MetaException.cpp">
-   </FileRef>
-   <FileRef
-      location = "group:/desenv/xworkspace/json2text/json2text/MetaException.hpp">
-   </FileRef>
-   <FileRef
-      location = "group:/desenv/xworkspace/json2text/json2text/Util.cpp">
-   </FileRef>
-   <FileRef
-      location = "group:/desenv/xworkspace/json2text/json2text/Util.hpp">
-   </FileRef>
-   <FileRef
       location = "self:json2text.xcodeproj">
    </FileRef>
 </Workspace>

@@ -63,14 +63,16 @@ enum jsonElements_t
 {
     init_tag,
     none_tag,
+    struct_tag,
     open_struct_tag,
     close_struct_tag,
-    attribute_tag,
+    attributive_tag,
     set_tag,
     value_tag,
     string_quote_tag,
     string_tag,
-    comma_tag,
+    limit_tag,
+    array_tag,
     open_array_tag,
     close_array_tag
 };
@@ -137,6 +139,7 @@ protected:
     istream& isIn = cin;
     jsonElements_t nType = none_tag;
     void addArrayToDataPath (jsonToTextContext& context);
+    void dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, string* strPath);
     
 private:
     jsonParser ();
@@ -147,13 +150,17 @@ private:
 
     void pushPath (jsonToTextContext& context);
     void popPath  (jsonToTextContext& context);
+
+    void pushPath (string& strPath, string& strNew);
+    void popPath  (string& strPath);
+
 public:
     
     jsonParser (istream& isIn);
     
     jsonToTextContext* getNextxpathLikeItem (jsonToTextContext& itereactor);
     
-    void dumpjsonAsText (ostream osOutput);
+    void dumpjsonAsText (ostream& osOutput);
 };
 
 

@@ -104,10 +104,15 @@ int main(int argc, const char * argv[]) {
     
     try
     {
+        /*
         while ((lexParser.getNextxpathLikeItem(iteractor)) != NULL)
         {
             cout << iteractor.strDataPath << " = " << iteractor.strDataValue << endl;
         }
+        */
+        
+        lexParser.dumpjsonAsText (cout);
+        
     }
     catch (MetaException* ex)
     {

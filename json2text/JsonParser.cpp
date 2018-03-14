@@ -52,7 +52,7 @@ jsonParser::jsonParser ()
 
 
 jsonParser::jsonParser (istream& isIn) : isIn (isIn)
-{cout << "init class: " << typeid(this).name() << endl; }
+{cerr << "init class: " << typeid(this).name() << endl; }
 
 
 jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet)
@@ -68,7 +68,7 @@ jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet
     {
         chChar = isIn.get();
         
-        //cout << chChar << " tp: " << nType << " : String: [" << strData << "]" <<  " EOF: " << isIn.eof () << endl;
+        //cerr << chChar << " tp: " << nType << " : String: [" << strData << "]" <<  " EOF: " << isIn.eof () << endl;
         
         if (nType == none_tag && chChar == '{')
         {
@@ -110,7 +110,7 @@ jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet
             strData = chChar;
             
             nType = none_tag;
-            return jsonLExRet.assign (comma_tag, strData);
+            return jsonLExRet.assign (limit_tag, strData);
         }
         else if (nType == none_tag && chChar == '"')
         {
@@ -118,7 +118,7 @@ jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet
         }
         else if (nType == string_quote_tag && chChar == '"' && bAddNext == false)
         {
-            //cout << "Return \"\" string" << endl;
+            //cerr << "Return \"\" string" << endl;
             
             nType = none_tag;
             return jsonLExRet.assign(string_tag, strData);
@@ -129,7 +129,7 @@ jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet
         }
         else if (nType == none_tag && !isBetween (chChar, LX_DIVISION, sizeof (LX_DIVISION)-1) )
         {
-            //cout << "setting simple string...." << endl;
+            //cerr << "setting simple string...." << endl;
             
             isIn.putback(chChar);
             
@@ -142,7 +142,7 @@ jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet
                 isIn.putback(chChar);
             }
             
-            //cout << "Return simple srtring " << endl;
+            //cerr << "Return simple srtring " << endl;
             
             nType = none_tag;
             return jsonLExRet.assign(string_tag, strData);
@@ -151,7 +151,7 @@ jsonParserITemRet* jsonParser::getNextLexicalItem (jsonParserITemRet& jsonLExRet
         {
             if (bAddNext == true) bAddNext = false;
             
-            //cout << "adding [" << chChar << "] - type: " << nType << endl;
+            //cerr << "adding [" << chChar << "] - type: " << nType << endl;
             
             /*
              if (chChar == '\n')
@@ -192,7 +192,7 @@ void jsonParser::pushPath (jsonToTextContext& context)
     
     context.nCurrentLevel++;
     
-    cout << endl << "New Path: [" << context.strPath << "] VariableName.size: [" << context.strVariableName.size() << "]" << endl<<endl;
+    cerr << endl << "New Path: [" << context.strPath << "] VariableName.size: [" << context.strVariableName.size() << "]" << endl<<endl;
 
     context.strVariableName = "";
 }
@@ -204,13 +204,13 @@ void jsonParser::popPath  (jsonToTextContext& context)
     if (nLastSlash == string::npos)
         return;
     
-    cout << endl;
-    cout << "Actual Path: [" << context.strPath << "(" << context.strPath.size() << ", " << nLastSlash << "," << context.strPath [nLastSlash] << ")" << endl;
+    cerr << endl;
+    cerr << "Actual Path: [" << context.strPath << "(" << context.strPath.size() << ", " << nLastSlash << "," << context.strPath [nLastSlash] << ")" << endl;
     
     context.strPath.resize(nLastSlash);
     if (context.nCurrentLevel >= context.nMinimalLevel) context.nCurrentLevel--;
     
-    cout << "Old Path: [" << context.strPath << "]" << endl << endl;
+    cerr << "Old Path: [" << context.strPath << "]" << endl << endl;
 }
 
 
@@ -224,7 +224,7 @@ void jsonParser::addArrayToDataPath (jsonToTextContext& context)
         
         context.strDataPath = context.strDataPath + strsValue.str();
         
-        //cout << "Added Array data: " << context.strDataPath << endl;
+        //cerr << "Added Array data: " << context.strDataPath << endl;
     }
 
     //context.strDataPath += "." + std::to_string(context.nArrayItemCounter) + "." + std::to_string(context.nArrayCounter);
@@ -242,20 +242,20 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
         
     while (getNextLexicalItem(jsonLexRet) != NULL)
     {
-        cout << "received : " << jsonLexRet.jsoneType << " : " << jsonLexRet.strValue << "; -->      nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
+        cerr << "received : " << jsonLexRet.jsoneType << " : " << jsonLexRet.strValue << "; -->      nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
     
         
         if (jsonLexRet.jsoneType == open_struct_tag)
         {
-            if (context.nStatus != init_tag) pushPath (context);
+            if (context.nStatus != init_tag && context.strVariableName.size()>0) pushPath (context);
             
             context.nStatus = none_tag;
         }
         else if (context.nCurrentLevel >= context.nMinimalLevel && jsonLexRet.jsoneType == close_struct_tag )
         {
-            cout << "Closing struct: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
+            cerr << "Closing struct: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
             
-            popPath (context);
+            if (context.nCurrentLevel > context.nMinimalLevel) popPath (context);
             
             if (context.nCurrentLevel > 0) context.nArrayItemCounter++;
             
@@ -265,7 +265,7 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
         {
             context.nStatus = none_tag;
             
-            //cout << "Open Array: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
+            //cerr << "Open Array: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
 
             context.lifoArrayLimits.push (context.nCurrentLevel);
             context.lifoArrayCounters.push (context.nArrayItemCounter);
@@ -280,24 +280,24 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
             
             context.nArrayCounter++;
         }
-        else if (context.nStatus == attribute_tag && (jsonLexRet.jsoneType == set_tag))
+        else if (context.nStatus == attributive_tag && (jsonLexRet.jsoneType == set_tag))
         {
             context.nStatus = value_tag;
         }
-        else if ((context.nStatus == none_tag || context.nStatus == attribute_tag) && jsonLexRet.jsoneType == close_array_tag)
+        else if ((context.nStatus == none_tag || context.nStatus == attributive_tag) && jsonLexRet.jsoneType == close_array_tag)
         {
             bool brMustReturn = false;
             
             VERIFY(context.lifoArrayLimits.empty() == false, 10, "Error, Array controler lifo empty.");
             
-            cout << "Open Array: Peering:  nMinimalLevel: " << context.lifoArrayLimits.top() << "; nArrayItemCounter: " << context.lifoArrayCounters.top() << endl;
+            cerr << "Open Array: Peering:  nMinimalLevel: " << context.lifoArrayLimits.top() << "; nArrayItemCounter: " << context.lifoArrayCounters.top() << endl;
             
             context.nMinimalLevel = context.lifoArrayLimits.top();
             context.lifoArrayLimits.pop(); //cleaning the last item pushed
             
-            cout << "Open Array: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
+            cerr << "Open Array: nCurrentLevel: " << context.nCurrentLevel <<"; nMinimalLevel: " << context.nMinimalLevel << "; Array Counter: " << context.nArrayCounter << endl;
             
-            if (context.nStatus == attribute_tag)
+            if (context.nStatus == attributive_tag)
             {
                 context.strVariableName.size();
                 
@@ -333,9 +333,9 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
             
             //VERIFY (getNextLexicalItem(jsonLexRet) != NULL && jsonLexRet.jsoneType == set_tag, toText_Set_Expected, "Error, no set char fond.");
             
-            context.nStatus = attribute_tag;
+            context.nStatus = attributive_tag;
         }
-        else if (context.nStatus == attribute_tag)
+        else if (context.nStatus == attributive_tag)
         {
             context.strDataValue =  context.strVariableName;
             context.strDataPath  =   context.strPath;
@@ -368,16 +368,137 @@ jsonToTextContext* jsonParser::getNextxpathLikeItem (jsonToTextContext& context)
 }
 
 
-
-
-void jsonParser::dumpjsonAsText (ostream osOutput)
+void jsonParser::dumpjsonAsText (ostream& osOutput)
 {
+    string strPath;
     
+    dumpjsonAsText (osOutput, init_tag, &strPath);
+}
+
+
+void jsonParser::pushPath (string& strPath, string& strNew)
+{
+    strPath +=  "/" + strNew;
+
+    strNew = "";
+}
+
+void jsonParser::popPath  (string& strPath)
+{
+    size_t nLastSlash = strPath.find_last_of("/");
+    
+    if (nLastSlash == string::npos)
+        return;
+    
+    cerr << endl;
+    cerr << "Actual Path: [" << strPath << "(" << strPath.size() << ", " << nLastSlash << "," << strPath [nLastSlash] << ")" << endl;
+    
+    strPath.resize(nLastSlash);
+    
+    cerr << "Previous accessed: [" << strPath << "]" << endl << endl;
+}
+
+#define prt_tag(x,y) cerr << x << "=" << y << endl
+
+void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, string* strPath)
+{
     jsonParserITemRet jsonLexRet;
+    jsonElements_t nWorking = none_tag;
     
+    string strValue = "";
+    
+    
+    if (nStatus == struct_tag || nStatus == array_tag)
+    {
+        nWorking = nStatus;
+        
+    
+    }
     
     while (getNextLexicalItem(jsonLexRet) != NULL)
     {
+        if (nStatus == none_tag && strValue.size() > 0)
+        {
+            strValue = "";
+        }
+        
+        if (jsonLexRet.jsoneType == open_struct_tag)
+        {
+            if (nStatus != init_tag)
+            {
+                if (nStatus == set_tag && strValue.size()>0) pushPath(*strPath, strValue);
+                
+                dumpjsonAsText (osOutput, struct_tag, strPath);
+            }
+            
+            nStatus = none_tag;
+            
+            continue;
+        }
+        else if (jsonLexRet.jsoneType == open_array_tag)
+        {
+            VERIFY ( nStatus == attributive_tag &&strValue.size() > 0, 11,
+                    "Errro, the Array MUST be after an attributive session.");
+            
+            pushPath(*strPath, strValue);
+            
+            dumpjsonAsText (osOutput, array_tag, strPath);
+        }
+        else if (nStatus == none_tag && jsonLexRet.jsoneType == string_tag)
+        {
+            strValue = jsonLexRet.strValue;
+            nStatus = string_tag;
+            
+            continue;
+        }
+        else if (nStatus == string_tag)
+        {
+            if (jsonLexRet.jsoneType == set_tag)
+            {
+                nStatus = attributive_tag;
+                
+                continue;
+            }
+            else if (jsonLexRet.jsoneType == limit_tag)
+            {
+                nStatus = value_tag;
+            }
+        }
+        
+        
+        if (nWorking == struct_tag)
+        {
+            if (nStatus == value_tag)
+            {
+                prt_tag(*strPath << "none", jsonLexRet.strValue);
+            }
+            else if (jsonLexRet.jsoneType == close_array_tag)
+            {
+                VERIFY (nStatus == none_tag, 12, "Error, closing struct must be CLEAR.");
+                
+                return;
+            }
+            nStatus = none_tag;
+        }
+        else if (nWorking == array_tag)
+        {
+            if (nStatus == value_tag)
+            {
+                prt_tag(*strPath, jsonLexRet.strValue);
+            }
+            else if (jsonLexRet.jsoneType == close_array_tag)
+            {
+                if (nStatus == string_tag)
+                {
+                    prt_tag(*strPath, jsonLexRet.strValue);
+                }
+                
+                popPath(*strPath);
+                
+                return;
+            }
+            nStatus = none_tag;
+        }
     }
 }
 
