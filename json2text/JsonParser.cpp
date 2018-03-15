@@ -222,7 +222,7 @@ void jsonParser::popPath  (string& strPath)
     nLevelCounter--;
 }
 
-#define prt_tag(x,y) if (nArrayLevel == 0) { cout << x << "=" << y << endl; } else { cout << x << "(" << to_string(this->nLevelID) << "." << to_string(nLevelID) << "." << to_string(++nItensCounter) << ")" << "=" << y << endl; }
+#define prt_tag(x,y) if (nArrayLevel == 0) { cout << x << "=" << y << endl; } else { cout << x << "(" << to_string(this->nLevelCounter) << "." << to_string(nLevelID) << "." << to_string(++nItensCounter) << ")" << "=" << y << endl; }
 
 void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, string* strPath, uint64_t nLevelID)
 {
@@ -246,6 +246,8 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
             
             //cerr << "*** ENTRING into the new level : " << nArrayLevel << ", Counter: " << this->nArrayCounter << ", pointer: " << to_string((uint64_t) &jsonLexRet) <<  endl;
         }
+        
+        nLevelCounter++;
         
         this->nLevelID++;
         nStatus = none_tag;
@@ -353,6 +355,8 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
                     popPath(*strPath);
                 }
                 
+                //nLevelCounter--;
+                
                 return;
             }
             
@@ -371,6 +375,7 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
                 popPath(*strPath);
                 
                 nArrayLevel--;
+                //nLevelCounter--;
                 
                 return;
             }
