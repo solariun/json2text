@@ -100,7 +100,6 @@ int main(int argc, const char * argv[]) {
     
     jsonParser lexParser (*isInput);
     
-    jsonToTextContext iteractor;
     
     try
     {

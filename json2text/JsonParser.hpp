@@ -104,31 +104,6 @@ public:
     string           strAttribute = "";
 };
 
-/*
- * Type used for json for text interactions
- */
-
-class jsonToTextContext
-{
-public:
-    string      strPath = "";
-    string      strVariableName = "";
-    size_t      nCurrentLevel=0;
-    size_t      nMinimalLevel=0;
-    size_t      nArrayItemCounter = 0;
-    size_t      nArrayCounter=0;
-    
-    bool        bArrayOn;
-    
-    stack<size_t>  lifoArrayLimits;
-    stack<size_t>  lifoArrayCounters;
-    
-    jsonElements_t nStatus = init_tag;
-    
-    string strDataPath = "";
-    string strDataValue= "";
-    
-};
 
 /*
  * Implementation Prototypes
@@ -139,7 +114,7 @@ class jsonParser
 protected:
     istream& isIn = cin;
     jsonElements_t nType = none_tag;
-    void addArrayToDataPath (jsonToTextContext& context);
+
     void dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, string* strPath);
     
 private:
@@ -149,8 +124,6 @@ private:
 
     jsonParserITemRet* getNextLexicalItem (jsonParserITemRet& strData);
 
-    void pushPath (jsonToTextContext& context);
-    void popPath  (jsonToTextContext& context);
 
     void pushPath (string& strPath, string& strNew);
     void popPath  (string& strPath);
@@ -158,8 +131,6 @@ private:
 public:
     
     jsonParser (istream& isIn);
-    
-    jsonToTextContext* getNextxpathLikeItem (jsonToTextContext& itereactor);
     
     void dumpjsonAsText (ostream& osOutput);
 };
