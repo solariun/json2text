@@ -249,7 +249,6 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
         
         nLevelCounter++;
         
-        this->nLevelID++;
         nStatus = none_tag;
     }
     
