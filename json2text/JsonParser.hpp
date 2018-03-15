@@ -117,7 +117,13 @@ protected:
 
     void dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, string* strPath);
     
+    uint64_t  nLevelCounter = 0;
+    uint64_t  nItensCounter = 0;
+    uint64_t  nArrayLevel = 0;
+    uint64_t  nLevelID = 0;
+    
 private:
+    
     jsonParser ();
     
     jsonParserITemRet* getNewjsonParserITemRet(jsonElements_t  jsoneType, string strValue);

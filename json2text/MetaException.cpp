@@ -95,7 +95,7 @@ void MetaException::verify(bool bCriteria, const char* pszType, const char* pszF
         
         strsValue << " at " << pszFile << "(" << nFileLine << "), Func: [" << pszFuncion << "], Code: [" << pszCode << "], ID:(" << nExID << "):" << pszStringValue;
         
-        std::abort();
+        //std::abort();
         
         throw new MetaException (strClassName, nExID, strsValue.str());
     }

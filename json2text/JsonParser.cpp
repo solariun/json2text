@@ -201,6 +201,8 @@ void jsonParser::pushPath (string& strPath, string& strNew)
     strPath +=  "/" + strNew;
 
     strNew = "";
+    
+    nLevelCounter++;
 }
 
 void jsonParser::popPath  (string& strPath)
@@ -216,26 +218,38 @@ void jsonParser::popPath  (string& strPath)
     strPath.resize(nLastSlash);
     
     //cerr << "Previous accessed: [" << strPath << "]" << endl << endl;
+    
+    nLevelCounter--;
 }
 
-#define prt_tag(x,y) cerr << x << "=" << y << endl
+#define prt_tag(x,y) if (nArrayLevel == 0) { cout << x << "=" << y << endl; } else { cout << x << "(" << to_string(nLevelID) << "." << to_string(++nItensCounter) << ")" << "=" << y << endl; }
 
 void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, string* strPath)
 {
     jsonParserITemRet jsonLexRet;
     jsonElements_t nWorking = none_tag;
     
-    uint32_t  nLevels = 0;
-    
     string strValue = "";
     
+    uint64_t nLevelID = ++this->nLevelID;
     
     if (nStatus == named_struct_tag || nStatus == struct_tag || nStatus == array_tag)
     {
         nWorking = nStatus;
         
+        if (nStatus == array_tag)
+        {
+            nItensCounter=0;
+            
+            nArrayLevel++;
+            
+            //cerr << "*** ENTRING into the new level : " << nArrayLevel << ", Counter: " << this->nArrayCounter << ", pointer: " << to_string((uint64_t) &jsonLexRet) <<  endl;
+        }
+        
         nStatus = none_tag;
     }
+    
+
     
     while (getNextLexicalItem(jsonLexRet) != NULL)
     {
@@ -258,10 +272,14 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
             {
                 jsonElements_t tempStatus = struct_tag;
                 
+                if (nWorking == struct_tag)
+                {
+                    nItensCounter++;
+                }
+                
                 if (nStatus == attributive_tag && strValue.size()>0)
                 {
                     pushPath(*strPath, strValue);
-                    nLevels++;
                     
                     tempStatus = named_struct_tag;
                 }
@@ -279,7 +297,6 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
                     "Errro, the Array MUST be after an attributive session.");
             
             pushPath(*strPath, strValue);
-            nLevels++;
             
             dumpjsonAsText (osOutput, array_tag, strPath);
             
@@ -348,6 +365,8 @@ void jsonParser::dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, stri
                 }
                 
                 popPath(*strPath);
+                
+                nArrayLevel--;
                 
                 return;
             }
