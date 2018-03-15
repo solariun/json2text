@@ -115,7 +115,7 @@ protected:
     istream& isIn = cin;
     jsonElements_t nType = none_tag;
 
-    void dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, string* strPath);
+    void dumpjsonAsText (ostream& osOutput, jsonElements_t nStatus, string* strPath, uint64_t nLevelID=0);
     
     uint64_t  nLevelCounter = 0;
     uint64_t  nItensCounter = 0;
